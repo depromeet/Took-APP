@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "Took-RN",
-    "slug": "Took-RN",
+    "slug": "took",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -36,6 +36,15 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "6380c63b-460c-43e1-a60a-3ca4f004da3d"
+      }
+    },
+    "owner": "evenway2025"
   }
 }
