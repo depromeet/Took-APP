@@ -1,19 +1,19 @@
-import { WebView } from "react-native-webview";
-import Constants from "expo-constants";
 import { StyleSheet } from "react-native";
+import CustomWebView from "@/components/customWebView";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function OnBoardingView() {
   return (
-    <WebView
-      style={styles.container}
-      source={{ uri: "https://www.naver.com" }}
-    />
+    <SafeAreaView style={styles.safeArea}>
+      <CustomWebView
+        source={{ uri: "https://local.took.com:2222/card-create" }}
+      />
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  safeArea: {
     flex: 1,
-    marginTop: Constants.statusBarHeight,
   },
 });
