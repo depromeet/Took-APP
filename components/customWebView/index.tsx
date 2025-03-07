@@ -1,8 +1,11 @@
-import React from "react";
+import { useBackHandler } from "@react-native-community/hooks";
+import React, { useRef, useState } from "react";
+import { StyleProp, ViewStyle } from "react-native";
 import { WebView } from "react-native-webview";
 
 interface CustomWebViewProps {
   source: { uri: string };
+  style?: StyleProp<ViewStyle>;
 }
 
 const DISABLE_PINCH_ZOOM = `(function() {
@@ -15,11 +18,30 @@ const DISABLE_PINCH_ZOOM = `(function() {
     document.body.style['-webkit-user-select'] = 'none'; // ios 방지 - 텍스트 롱 프레스
   })();`;
 
-const CustomWebView = ({ source, ...props }: CustomWebViewProps) => {
+// allowsLinkPreview={false} - iOS에서 링크 미리보기 방지
+const CustomWebView = ({ style, source, ...props }: CustomWebViewProps) => {
+  const webViewRef = useRef<WebView | null>(null);
+  const [canGoBack, setCanGoBack] = useState(false);
+
+  useBackHandler(() => {
+    if (canGoBack && webViewRef.current !== null) {
+      webViewRef.current.goBack();
+      return true;
+    }
+    return false;
+  });
+
   return (
     <WebView
+      style={style}
       source={source}
-      injectedJavaScriptBeforeContentLoaded={DISABLE_PINCH_ZOOM}
+      injectedJavaScript={DISABLE_PINCH_ZOOM}
+      javaScriptEnabled={true}
+      allowsLinkPreview={false}
+      onMessage={() => {}}
+      onNavigationStateChange={(event) => {
+        setCanGoBack(event.canGoBack);
+      }}
       {...props}
     />
   );
