@@ -8,8 +8,14 @@
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.evenway2025.took"
     },
     "web": {
       "bundler": "metro",
@@ -24,8 +30,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
+          "image": "./assets/images/splash.png",
+          "dark": {
+            "image": "./assets/images/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+          },
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
@@ -42,6 +52,9 @@
         "projectId": "6380c63b-460c-43e1-a60a-3ca4f004da3d"
       }
     },
-    "owner": "evenway2025"
+    "owner": "evenway2025",
+    "android": {
+      "package": "com.evenway2025.took"
+    }
   }
 }
