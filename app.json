@@ -5,7 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/appIcon.png",
-    "scheme": "myapp",
+    "scheme": "took",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
@@ -16,6 +16,13 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.evenway2025.took"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.evenway2025.took"
     },
     "web": {
       "bundler": "metro",
