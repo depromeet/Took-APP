@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DarkTheme,
   DefaultTheme,
@@ -19,7 +19,7 @@ import {
 } from "@/providers/OnBoardingProvider";
 import { WebViewProvider } from "@/providers/WebViewProvider";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
+// 앱 시작 시 스플래시 화면 자동 숨김 방지
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -27,14 +27,20 @@ export default function RootLayout() {
   const [loaded] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
+  const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
-    if (loaded) {
-      SplashScreen.hideAsync();
+    async function prepare() {
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2초 대기
+      setAppReady(true);
+      // 모든 조건이 완료된 후 splash 숨기기
+      await SplashScreen.hideAsync();
     }
-  }, [loaded]);
+    prepare();
+  }, []);
 
-  if (!loaded) {
+  // 폰트가 아직 로드되지 않았거나 앱 준비가 안 됐으면 splash를 계속 보여줌.
+  if (!loaded || !appReady) {
     return null;
   }
 
