@@ -22,7 +22,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.evenway2025.took"
+      "package": "com.evenway2025.took",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "bundler": "metro",

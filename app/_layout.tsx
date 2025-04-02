@@ -18,6 +18,18 @@ import {
   useOnboarding,
 } from "@/providers/OnBoardingProvider";
 import { WebViewProvider } from "@/providers/WebViewProvider";
+import NotificationProvider from "@/providers/NotificationContext";
+
+import * as Notifications from "expo-notifications";
+
+// 푸시 알림 설정
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowAlert: true, // 알림 표시 여부
+    shouldPlaySound: false, // 소리 재생 여부
+    shouldSetBadge: false, // 배지 표시 여부
+  }),
+});
 
 // 앱 시작 시 스플래시 화면 자동 숨김 방지
 SplashScreen.preventAutoHideAsync();
@@ -45,11 +57,13 @@ export default function RootLayout() {
   }
 
   return (
-    <WebViewProvider>
-      <OnboardingProvider>
-        <InnerRootLayout colorScheme={colorScheme} />
-      </OnboardingProvider>
-    </WebViewProvider>
+    <NotificationProvider>
+      <WebViewProvider>
+        <OnboardingProvider>
+          <InnerRootLayout colorScheme={colorScheme} />
+        </OnboardingProvider>
+      </WebViewProvider>
+    </NotificationProvider>
   );
 }
 
@@ -62,8 +76,17 @@ function InnerRootLayout({ colorScheme }: { colorScheme: ColorSchemeName }) {
         {isOnboarded ? (
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         ) : (
+          // <Stack.Screen
+          //   name="(auth)"
+          //   options={{
+          //     headerShown: false,
+          //     headerStyle: {
+          //       backgroundColor: "black",
+          //     },
+          //   }}
+          // />
           <Stack.Screen
-            name="(auth)"
+            name="NotificationTestScreen"
             options={{
               headerShown: false,
               headerStyle: {
