@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash.png",
-      "resizeMode": "contain",
+      "resizeMode": "cover",
       "backgroundColor": "#ffffff"
     },
     "ios": {
@@ -19,7 +19,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/appIcon.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.evenway2025.took",
@@ -41,10 +41,10 @@
           "image": "./assets/images/splash.png",
           "dark": {
             "image": "./assets/images/splash.png",
-            "resizeMode": "contain",
+            "resizeMode": "cover",
             "backgroundColor": "#ffffff"
           },
-          "resizeMode": "contain",
+          "resizeMode": "cover",
           "backgroundColor": "#ffffff"
         }
       ]
