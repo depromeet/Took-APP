@@ -13,10 +13,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { ColorSchemeName } from "react-native";
-import {
-  OnboardingProvider,
-  useOnboarding,
-} from "@/providers/OnBoardingProvider";
+import { OnboardingProvider } from "@/providers/OnBoardingProvider";
 import { WebViewProvider } from "@/providers/WebViewProvider";
 import NotificationProvider from "@/providers/NotificationContext";
 
@@ -72,24 +69,18 @@ interface InnerRootLayoutProps {
 }
 
 function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
-  const { isOnboarded } = useOnboarding();
-
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        {isOnboarded ? (
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        ) : (
-          <Stack.Screen
-            name="(auth)"
-            options={{
-              headerShown: false,
-              headerStyle: {
-                backgroundColor: "black",
-              },
-            }}
-          />
-        )}
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: "black",
+            },
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

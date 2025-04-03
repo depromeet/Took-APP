@@ -1,12 +1,24 @@
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNotification } from "../providers/NotificationContext";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Button } from "react-native";
+import * as Notifications from "expo-notifications";
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "white",
   },
 });
+
+async function schedulePushNotification(data: string) {
+  await Notifications.scheduleNotificationAsync({
+    content: {
+      title: "테스트 알림",
+      body: data,
+    },
+    trigger: null,
+  });
+}
 
 export default function NotificationTestScreen() {
   const { expoPushToken, notification, error } = useNotification();
@@ -21,7 +33,7 @@ export default function NotificationTestScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <Text style={{ fontSize: 20, fontWeight: "bold" }}>
           expoPushToken: {expoPushToken}
         </Text>
@@ -32,6 +44,11 @@ export default function NotificationTestScreen() {
           error: {JSON.stringify(error)}
         </Text>
       </View>
+
+      <Button
+        title="test"
+        onPress={() => schedulePushNotification("윤장원입니다.")}
+      />
     </SafeAreaView>
   );
 }

@@ -8,7 +8,6 @@ import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
-import { router } from "expo-router";
 
 const styles = StyleSheet.create({
   container: {
@@ -27,14 +26,24 @@ const OnboardingScreens = () => {
       const data = JSON.parse(event.nativeEvent.data);
 
       if (data.type === "GOOGLE_LOGIN") {
+        console.log("Opening auth session with URL:", data.url);
+        const redirectUrl = Linking.createURL("oauth2redirect");
+
         const result = await WebBrowser.openAuthSessionAsync(
           data.url,
-          Linking.createURL("oauth2redirect"),
+          redirectUrl,
         );
 
+        console.log("result", JSON.stringify(result, null, 2));
+
         if (result.type === "success") {
+          // 성공 시 웹브라우저는 자동으로 닫히고 앱으로 돌아옴
+          console.log("성공");
+
           completeOnboarding();
-          router.replace("/(tabs)");
+          Linking.openURL("took://");
+        } else if (result.type === "cancel") {
+          alert("로그인이 취소되었습니다. 다시 시도해주세요.");
         }
       }
     } catch (error) {
