@@ -8,6 +8,7 @@ import Constants from "expo-constants";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
+import { router } from "expo-router";
 
 const styles = StyleSheet.create({
   container: {
@@ -33,6 +34,7 @@ const OnboardingScreens = () => {
 
         if (result.type === "success") {
           completeOnboarding();
+          router.replace("/(tabs)");
         }
       }
     } catch (error) {

@@ -22,9 +22,15 @@ export default function NotificationTestScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View>
-        <Text>expoPushToken: {expoPushToken}</Text>
-        <Text>notification: {JSON.stringify(notification)}</Text>
-        <Text>error: {JSON.stringify(error)}</Text>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          expoPushToken: {expoPushToken}
+        </Text>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          notification: {JSON.stringify(notification)}
+        </Text>
+        <Text style={{ fontSize: 20, fontWeight: "bold" }}>
+          error: {JSON.stringify(error)}
+        </Text>
       </View>
     </SafeAreaView>
   );

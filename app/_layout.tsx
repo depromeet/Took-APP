@@ -43,7 +43,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2초 대기
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // 3초 대기
       setAppReady(true);
       // 모든 조건이 완료된 후 splash 숨기기
       await SplashScreen.hideAsync();
@@ -67,7 +67,11 @@ export default function RootLayout() {
   );
 }
 
-function InnerRootLayout({ colorScheme }: { colorScheme: ColorSchemeName }) {
+interface InnerRootLayoutProps {
+  readonly colorScheme: ColorSchemeName;
+}
+
+function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
   const { isOnboarded } = useOnboarding();
 
   return (
@@ -76,17 +80,8 @@ function InnerRootLayout({ colorScheme }: { colorScheme: ColorSchemeName }) {
         {isOnboarded ? (
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         ) : (
-          // <Stack.Screen
-          //   name="(auth)"
-          //   options={{
-          //     headerShown: false,
-          //     headerStyle: {
-          //       backgroundColor: "black",
-          //     },
-          //   }}
-          // />
           <Stack.Screen
-            name="NotificationTestScreen"
+            name="(auth)"
             options={{
               headerShown: false,
               headerStyle: {

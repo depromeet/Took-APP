@@ -11,11 +11,15 @@
     "splash": {
       "image": "./assets/images/splash.png",
       "resizeMode": "cover",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#ffffff",
+      "imageResizeMode": "cover"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.evenway2025.took"
+      "bundleIdentifier": "com.evenway2025.took",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -39,13 +43,9 @@
         "expo-splash-screen",
         {
           "image": "./assets/images/splash.png",
-          "dark": {
-            "image": "./assets/images/splash.png",
-            "resizeMode": "cover",
-            "backgroundColor": "#ffffff"
-          },
           "resizeMode": "cover",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#ffffff",
+          "imageResizeMode": "cover"
         }
       ]
     ],
