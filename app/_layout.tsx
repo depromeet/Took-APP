@@ -13,10 +13,7 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 
 import { ColorSchemeName } from "react-native";
-import {
-  OnboardingProvider,
-  useOnboarding,
-} from "@/providers/OnBoardingProvider";
+import { OnboardingProvider } from "@/providers/OnBoardingProvider";
 import { WebViewProvider } from "@/providers/WebViewProvider";
 import NotificationProvider from "@/providers/NotificationContext";
 
@@ -43,7 +40,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2초 대기
+      await new Promise((resolve) => setTimeout(resolve, 3000)); // 3초 대기
       setAppReady(true);
       // 모든 조건이 완료된 후 splash 숨기기
       await SplashScreen.hideAsync();
@@ -67,34 +64,23 @@ export default function RootLayout() {
   );
 }
 
-function InnerRootLayout({ colorScheme }: { colorScheme: ColorSchemeName }) {
-  const { isOnboarded } = useOnboarding();
+interface InnerRootLayoutProps {
+  readonly colorScheme: ColorSchemeName;
+}
 
+function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
       <Stack>
-        {isOnboarded ? (
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        ) : (
-          // <Stack.Screen
-          //   name="(auth)"
-          //   options={{
-          //     headerShown: false,
-          //     headerStyle: {
-          //       backgroundColor: "black",
-          //     },
-          //   }}
-          // />
-          <Stack.Screen
-            name="NotificationTestScreen"
-            options={{
-              headerShown: false,
-              headerStyle: {
-                backgroundColor: "black",
-              },
-            }}
-          />
-        )}
+        <Stack.Screen
+          name="(auth)"
+          options={{
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: "black",
+            },
+          }}
+        />
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />

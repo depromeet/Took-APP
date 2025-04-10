@@ -45,7 +45,10 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
 
   useEffect(() => {
     registerForPushNotificationsAsync().then(
-      (token) => setExpoPushToken(token ?? null),
+      (token) => {
+        console.log("token", token);
+        setExpoPushToken(token ?? null);
+      },
       (error) => setError(error),
     );
 
