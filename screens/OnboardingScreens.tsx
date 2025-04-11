@@ -21,30 +21,36 @@ const OnboardingScreens = () => {
   const webViewRef = useRef<WebView | null>(null);
   const { completeOnboarding } = useOnboarding();
 
-  const handleMessage = async (event: any) => {
+  // GOOGLE_LOGIN 처리 함수
+  const handleGoogleLogin = async (url: string) => {
+    console.log("Opening auth session with URL:", url);
+    const redirectUrl = Linking.createURL("oauth2redirect");
+
+    const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
+
+    console.log("result", JSON.stringify(result, null, 2));
+
+    if (result.type === "success") {
+      // 성공 시 웹브라우저는 자동으로 닫히고 앱으로 돌아옴
+      console.log("성공");
+
+      completeOnboarding();
+      Linking.openURL("took://");
+    } else if (result.type === "cancel") {
+      alert("로그인이 취소되었습니다. 다시 시도해주세요.");
+    }
+  };
+
+  // 웹뷰 메시지 처리 함수
+  const handleOnboardingMessage = async (event: any) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
 
       if (data.type === "GOOGLE_LOGIN") {
-        console.log("Opening auth session with URL:", data.url);
-        const redirectUrl = Linking.createURL("oauth2redirect");
-
-        const result = await WebBrowser.openAuthSessionAsync(
-          data.url,
-          redirectUrl,
-        );
-
-        console.log("result", JSON.stringify(result, null, 2));
-
-        if (result.type === "success") {
-          // 성공 시 웹브라우저는 자동으로 닫히고 앱으로 돌아옴
-          console.log("성공");
-
-          completeOnboarding();
-          Linking.openURL("took://");
-        } else if (result.type === "cancel") {
-          alert("로그인이 취소되었습니다. 다시 시도해주세요.");
-        }
+        await handleGoogleLogin(data.url);
+      } else if (data.type === "IMAGE_PICKER" && context) {
+        // WebViewProvider의 이미지 선택 함수 호출
+        await context.handleImageSelection(data.source);
       }
     } catch (error) {
       console.error("메시지 처리 중 오류:", error);
@@ -61,7 +67,7 @@ const OnboardingScreens = () => {
           webViewRef.current = ref;
         }}
         source={{ uri: WEBVIEW_URL.onboarding }}
-        onMessage={handleMessage}
+        onMessage={handleOnboardingMessage}
       />
     </SafeAreaView>
   );
