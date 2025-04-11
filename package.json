@@ -10,7 +10,11 @@
     "web": "expo start --web",
     "test": "jest --watchAll",
     "lint": "expo lint",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "build:android:dev": "eas build --profile development --platform android",
+    "build:ios:dev": "eas build --profile development --platform ios",
+    "build:android:prod": "eas build --profile production --platform android",
+    "build:ios:prod": "eas build --profile production --platform ios"
   },
   "jest": {
     "preset": "jest-expo"
@@ -28,8 +32,10 @@
     "expo-constants": "~17.0.8",
     "expo-dev-client": "^5.0.15",
     "expo-device": "~7.0.3",
+    "expo-file-system": "^18.0.12",
     "expo-font": "~13.0.4",
     "expo-haptics": "~14.0.1",
+    "expo-image-picker": "^16.0.6",
     "expo-linking": "~7.0.5",
     "expo-modules-core": "^2.2.3",
     "expo-notifications": "~0.29.14",
