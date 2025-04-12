@@ -8,12 +8,6 @@
     "scheme": "took",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/images/splash.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#ffffff",
-      "imageResizeMode": "cover"
-    },
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.evenway2025.took",
@@ -49,8 +43,7 @@
         {
           "image": "./assets/images/splash.png",
           "resizeMode": "cover",
-          "backgroundColor": "#ffffff",
-          "imageResizeMode": "cover"
+          "backgroundColor": "#ffffff"
         }
       ],
       [

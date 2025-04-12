@@ -40,13 +40,25 @@ export default function RootLayout() {
 
   useEffect(() => {
     async function prepare() {
-      await new Promise((resolve) => setTimeout(resolve, 3000)); // 3초 대기
-      setAppReady(true);
-      // 모든 조건이 완료된 후 splash 숨기기
-      await SplashScreen.hideAsync();
+      try {
+        // 앱 초기화 작업 (필요한 경우)
+        await new Promise((resolve) => setTimeout(resolve, 2000)); // 2초로 줄임
+      } catch (e) {
+        console.warn(e);
+      } finally {
+        setAppReady(true);
+      }
     }
+
     prepare();
   }, []);
+
+  useEffect(() => {
+    if (loaded && appReady) {
+      // 폰트 로드와 앱 준비가 모두 완료되면 스플래시 숨기기
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, appReady]);
 
   // 폰트가 아직 로드되지 않았거나 앱 준비가 안 됐으면 splash를 계속 보여줌.
   if (!loaded || !appReady) {
