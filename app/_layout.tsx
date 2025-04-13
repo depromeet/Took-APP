@@ -18,6 +18,10 @@ import { WebViewProvider } from "@/providers/WebViewProvider";
 import NotificationProvider from "@/providers/NotificationContext";
 
 import * as Notifications from "expo-notifications";
+import * as WebBrowser from "expo-web-browser";
+import getPushTokens from "@/utils/getPushTokens";
+
+WebBrowser.maybeCompleteAuthSession(); // 설명 - 웹브라우저 세션 자동 완료 설정 추가
 
 // 푸시 알림 설정
 Notifications.setNotificationHandler({
@@ -30,6 +34,9 @@ Notifications.setNotificationHandler({
 
 // 앱 시작 시 스플래시 화면 자동 숨김 방지
 SplashScreen.preventAutoHideAsync();
+
+// 푸시 알림 토큰 가져오기
+getPushTokens();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
