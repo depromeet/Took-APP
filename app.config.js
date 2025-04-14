@@ -69,6 +69,8 @@ export default {
           image: "./assets/images/splash.png",
           resizeMode: "cover",
           backgroundColor: "#ffffff",
+          imageWidth: "100%",
+          imageHeight: "100%",
         },
       ],
       [
