@@ -1,5 +1,5 @@
 import { WEBVIEW_URL } from "../config";
-import WebView from "react-native-webview";
+import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { useContext, useRef, useEffect } from "react";
 import { WebViewContext } from "@/providers/WebViewProvider";
 import { StyleSheet } from "react-native";
@@ -28,7 +28,7 @@ const OnboardingScreens = () => {
   }, [isOnboarded]);
 
   // 웹뷰 메시지 처리 함수
-  const handleOnboardingMessage = async (event: any) => {
+  const handleOnboardingMessage = async (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       console.log("웹뷰에서 메시지 수신:", data.type);
