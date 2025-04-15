@@ -1,9 +1,4 @@
-import {
-  DISABLE_PINCH_ZOOM,
-  PREVENT_BOUNCE,
-  CUSTOM_USER_AGENT,
-} from "@/constants";
-import { DISABLE_SCROLL_AND_ZOOM } from "@/constants/disabled";
+import { PREVENT_BOUNCE, CUSTOM_USER_AGENT } from "@/constants";
 import { useBackHandler } from "@react-native-community/hooks";
 import React, { useRef, useState, forwardRef, ForwardedRef } from "react";
 import { StyleProp, ViewStyle } from "react-native";
