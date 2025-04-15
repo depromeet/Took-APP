@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
 import { router } from "expo-router";
+import CustomWebView from "@/components/customWebView";
 
 const styles = StyleSheet.create({
   container: {
@@ -18,7 +19,7 @@ const styles = StyleSheet.create({
 const OnboardingScreens = () => {
   const context = useContext(WebViewContext);
   const webViewRef = useRef<WebView | null>(null);
-  const { isOnboarded, handleGoogleLogin } = useOnboarding();
+  const { isOnboarded } = useOnboarding();
 
   // 로그인 상태에 따라 메인 페이지로 리다이렉트
   useEffect(() => {
@@ -27,17 +28,20 @@ const OnboardingScreens = () => {
     }
   }, [isOnboarded]);
 
+  // ref 설정 시 WebViewContext에 추가
+  useEffect(() => {
+    if (webViewRef.current && context) {
+      context.addWebView(webViewRef.current);
+    }
+  }, [context]);
+
   // 웹뷰 메시지 처리 함수
   const handleOnboardingMessage = async (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       console.log("웹뷰에서 메시지 수신:", data.type);
 
-      if (data.type === "GOOGLE_LOGIN") {
-        console.log("구글 로그인 요청 수신");
-        // 네이티브 구글 로그인 실행
-        await handleGoogleLogin();
-      } else if (data.type === "IMAGE_PICKER" && context) {
+      if (data.type === "IMAGE_PICKER" && context) {
         // WebViewProvider의 이미지 선택 함수 호출
         await context.handleImageSelection(data.source);
       }
@@ -53,13 +57,8 @@ const OnboardingScreens = () => {
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
-      <WebView
-        ref={(ref) => {
-          if (ref != null) {
-            context?.addWebView(ref);
-          }
-          webViewRef.current = ref;
-        }}
+      <CustomWebView
+        ref={webViewRef}
         source={{ uri: WEBVIEW_URL.onboarding }}
         onMessage={handleOnboardingMessage}
       />
