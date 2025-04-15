@@ -1,13 +1,12 @@
 import { WEBVIEW_URL } from "../config";
-import WebView from "react-native-webview";
-import { useContext, useRef } from "react";
+import WebView, { WebViewMessageEvent } from "react-native-webview";
+import { useContext, useRef, useEffect } from "react";
 import { WebViewContext } from "@/providers/WebViewProvider";
 import { StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
-import * as WebBrowser from "expo-web-browser";
-import * as Linking from "expo-linking";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
+import { router } from "expo-router";
 
 const styles = StyleSheet.create({
   container: {
@@ -19,35 +18,25 @@ const styles = StyleSheet.create({
 const OnboardingScreens = () => {
   const context = useContext(WebViewContext);
   const webViewRef = useRef<WebView | null>(null);
-  const { completeOnboarding } = useOnboarding();
+  const { isOnboarded, handleGoogleLogin } = useOnboarding();
 
-  // GOOGLE_LOGIN 처리 함수
-  const handleGoogleLogin = async (url: string) => {
-    console.log("Opening auth session with URL:", url);
-    const redirectUrl = Linking.createURL("oauth2redirect");
-
-    const result = await WebBrowser.openAuthSessionAsync(url, redirectUrl);
-
-    console.log("result", JSON.stringify(result, null, 2));
-
-    if (result.type === "success") {
-      // 성공 시 웹브라우저는 자동으로 닫히고 앱으로 돌아옴
-      console.log("성공");
-
-      completeOnboarding();
-      Linking.openURL("took://");
-    } else if (result.type === "cancel") {
-      alert("로그인이 취소되었습니다. 다시 시도해주세요.");
+  // 로그인 상태에 따라 메인 페이지로 리다이렉트
+  useEffect(() => {
+    if (isOnboarded) {
+      router.replace("/");
     }
-  };
+  }, [isOnboarded]);
 
   // 웹뷰 메시지 처리 함수
-  const handleOnboardingMessage = async (event: any) => {
+  const handleOnboardingMessage = async (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
+      console.log("웹뷰에서 메시지 수신:", data.type);
 
       if (data.type === "GOOGLE_LOGIN") {
-        await handleGoogleLogin(data.url);
+        console.log("구글 로그인 요청 수신");
+        // 네이티브 구글 로그인 실행
+        await handleGoogleLogin();
       } else if (data.type === "IMAGE_PICKER" && context) {
         // WebViewProvider의 이미지 선택 함수 호출
         await context.handleImageSelection(data.source);
@@ -56,6 +45,11 @@ const OnboardingScreens = () => {
       console.error("메시지 처리 중 오류:", error);
     }
   };
+
+  // 이미 로그인된 상태라면 렌더링하지 않음
+  if (isOnboarded) {
+    return null;
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>

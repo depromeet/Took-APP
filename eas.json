@@ -6,7 +6,14 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "APP_ENV": "development",
+        "FIREBASE_CONFIG": "google-services.dev.json",
+        "GOOGLE_CLIENT_IOS": "890765471785-gli6ulvs6s580qcso9ldlsvjjf5vdlko.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_ANDROID": "890765471785-8s3nde991cotb5qhldrlbbni0uvuedba.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_WEB": "890765471785-afsh8orctuebf8u7ldioe3eeksglei1s.apps.googleusercontent.com"
+      }
     },
     "ios-simulator": {
       "extends": "development",
@@ -22,6 +29,14 @@
       }
     },
     "production": {
+      "distribution": "store",
+      "env": {
+        "APP_ENV": "production",
+        "FIREBASE_CONFIG": "google-services.prod.json",
+        "GOOGLE_CLIENT_IOS": "890765471785-gli6ulvs6s580qcso9ldlsvjjf5vdlko.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_ANDROID": "890765471785-8s3nde991cotb5qhldrlbbni0uvuedba.apps.googleusercontent.com",
+        "GOOGLE_CLIENT_WEB": "890765471785-afsh8orctuebf8u7ldioe3eeksglei1s.apps.googleusercontent.com"
+      },
       "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
