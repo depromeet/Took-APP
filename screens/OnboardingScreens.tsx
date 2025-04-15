@@ -7,6 +7,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
 import { router } from "expo-router";
+import * as Linking from "expo-linking";
 import CustomWebView from "@/components/customWebView";
 
 const styles = StyleSheet.create({
@@ -44,6 +45,21 @@ const OnboardingScreens = () => {
       if (data.type === "IMAGE_PICKER" && context) {
         // WebViewProvider의 이미지 선택 함수 호출
         await context.handleImageSelection(data.source);
+      }
+
+      if (data.type === "SHARE_CARD_DEEP_LINK" && context) {
+        try {
+          if (data.url) {
+            // expo-linking의 openURL 사용
+            await Linking.openURL(data.url);
+
+            // 추가로 URL 파싱도 가능
+            const { path, queryParams } = Linking.parse(data.url);
+            console.log(`Linked to path: ${path} with params:`, queryParams);
+          }
+        } catch (error) {
+          console.error("딥링크 처리 중 오류:", error);
+        }
       }
     } catch (error) {
       console.error("메시지 처리 중 오류:", error);
