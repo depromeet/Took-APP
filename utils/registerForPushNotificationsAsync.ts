@@ -3,8 +3,13 @@ import * as Notifications from "expo-notifications";
 import Constants from "expo-constants";
 import { Platform } from "react-native";
 
+// 환경에 따른 설정 가져오기
+const APP_ENV = Constants.expoConfig?.extra?.appEnv || "development";
+console.log(`[Push Notification] Current environment: ${APP_ENV}`);
+
 // 오류 처리 함수
 function handleRegistrationError(errorMessage: string) {
+  console.error(`[${APP_ENV}] Push registration error: ${errorMessage}`);
   alert(errorMessage);
   throw new Error(errorMessage);
 }
@@ -40,28 +45,50 @@ async function registerForPushNotificationsAsync() {
       );
       return;
     }
+
+    // 환경에 따른 프로젝트 ID 처리
     const projectId =
-      Constants?.expoConfig?.extra?.eas?.projectId ??
-      Constants?.easConfig?.projectId;
+      APP_ENV === "production"
+        ? Constants?.expoConfig?.extra?.eas?.projectId // 프로덕션 프로젝트 ID
+        : Constants?.expoConfig?.extra?.eas?.projectId; // 개발 프로젝트 ID (필요 시 다른 ID 사용)
+
     if (!projectId) {
       handleRegistrationError("프로젝트 ID를 찾을 수 없습니다.");
     }
+
     try {
+      console.log(
+        `[${APP_ENV}] Registering for push notifications with projectId: ${projectId}`,
+      );
+
       const pushTokenString = (
         await Notifications.getExpoPushTokenAsync({
           projectId,
         })
       ).data;
-      console.log(pushTokenString);
+
+      console.log(`[${APP_ENV}] Push Token: ${pushTokenString}`);
       return pushTokenString;
     } catch (e: unknown) {
-      handleRegistrationError(`${e}`);
+      handleRegistrationError(`FCM 토큰 등록 오류: ${e}`);
     }
   } else {
     // 물리적 기기에서만 푸시 알림 권한 요청
-    handleRegistrationError(
-      "물리적 기기에서만 푸시 알림 권한을 요청할 수 있습니다.",
+    console.warn(
+      "[Push Notification] Device is not physical - skipping push registration",
     );
+    if (APP_ENV === "development") {
+      // 개발 환경에서는 경고만 표시
+      console.warn(
+        "개발 환경에서는 에뮬레이터에 푸시 알림이 지원되지 않습니다.",
+      );
+      return "SIMULATOR_" + APP_ENV; // 시뮬레이터용 더미 토큰
+    } else {
+      // 프로덕션에서는 오류 발생
+      handleRegistrationError(
+        "물리적 기기에서만 푸시 알림 권한을 요청할 수 있습니다.",
+      );
+    }
   }
 }
 

@@ -6,7 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
-import WebView from "react-native-webview";
+import WebView, { WebViewMessageEvent } from "react-native-webview";
 import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { Alert } from "react-native";
@@ -102,7 +102,7 @@ const WebViewProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // 웹뷰로부터 메시지 수신 처리
-  const handleMessage = async (event: any) => {
+  const handleMessage = async (event: WebViewMessageEvent) => {
     try {
       if (typeof event.nativeEvent.data === "string") {
         if (event.nativeEvent.data.startsWith("{")) {
@@ -110,9 +110,6 @@ const WebViewProvider = ({ children }: { children: ReactNode }) => {
 
           if (data.type === "IMAGE_PICKER") {
             await handleImageSelection(data.source);
-          } else if (data.type === "GOOGLE_LOGIN") {
-            // 기존 로그인 처리 로직이 있다면 호출
-            // 현재 이 로직은 OnboardingScreens.tsx에 있음
           }
         } else {
           // 기존 쿠키 처리 등 다른 로직이 있다면 여기서 처리
