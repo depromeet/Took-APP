@@ -23,7 +23,6 @@ import * as Notifications from "expo-notifications";
 import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 
-import getPushTokens from "@/utils/getPushTokens";
 import { DeepLinkProvider, useDeepLink } from "@/providers/DeepLinkProvider";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -47,9 +46,6 @@ SplashScreen.setOptions({
 });
 
 const API_URL = "https://api.even-took.com";
-
-// 푸시 알림 토큰 가져오기
-getPushTokens();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
