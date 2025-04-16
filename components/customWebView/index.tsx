@@ -1,4 +1,4 @@
-import { DISABLE_PINCH_ZOOM, CUSTOM_USER_AGENT } from "@/constants";
+import { PREVENT_BOUNCE, CUSTOM_USER_AGENT } from "@/constants";
 import { useBackHandler } from "@react-native-community/hooks";
 import React, { useRef, useState, forwardRef, ForwardedRef } from "react";
 import { StyleProp, ViewStyle } from "react-native";
@@ -33,7 +33,10 @@ const CustomWebView = forwardRef(
         style={style}
         source={source}
         userAgent={CUSTOM_USER_AGENT}
-        injectedJavaScript={DISABLE_PINCH_ZOOM}
+        injectedJavaScript={PREVENT_BOUNCE}
+        bounces={false} // iOS 바운스 효과 비활성화
+        overScrollMode="never" // Android 오버스크롤 비활성화
+        scrollEnabled={true} //
         javaScriptEnabled={true}
         allowsLinkPreview={false}
         onMessage={onMessage || (() => {})}

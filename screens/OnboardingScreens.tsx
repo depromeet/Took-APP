@@ -8,6 +8,7 @@ import Constants from "expo-constants";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
 import { router } from "expo-router";
 import CustomWebView from "@/components/customWebView";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const styles = StyleSheet.create({
   container: {
@@ -39,11 +40,37 @@ const OnboardingScreens = () => {
   const handleOnboardingMessage = async (event: WebViewMessageEvent) => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
-      console.log("웹뷰에서 메시지 수신:", data.type);
+      console.log("웹뷰에서 메시지 수신 온보딩 :", data.type);
+      console.log("웹뷰에서 메시지 수신 온보딩 :", data.data);
 
       if (data.type === "IMAGE_PICKER" && context) {
         // WebViewProvider의 이미지 선택 함수 호출
         await context.handleImageSelection(data.source);
+      } else if (data.type === "AUTH_TOKEN" && data.data) {
+        console.log("인증 토큰 수신:", data.data);
+
+        // 토큰을 AsyncStorage에 저장
+        if (data.data.accessToken) {
+          await AsyncStorage.setItem("accessToken", data.data.accessToken);
+        }
+
+        if (data.data.refreshToken) {
+          await AsyncStorage.setItem("refreshToken", data.data.refreshToken);
+        }
+
+        if (data.data.userData) {
+          await AsyncStorage.setItem(
+            "userData",
+            JSON.stringify(data.data.userData),
+          );
+        }
+
+        // 로그인 상태 업데이트
+        await AsyncStorage.setItem("isLoggedIn", "true");
+        context?.setIsLoggedIn(true);
+
+        // 필요시 알림 표시
+        console.log("로그인 성공: 토큰이 저장되었습니다.");
       }
     } catch (error) {
       console.error("메시지 처리 중 오류:", error);

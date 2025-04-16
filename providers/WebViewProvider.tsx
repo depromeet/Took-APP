@@ -108,6 +108,8 @@ const WebViewProvider = ({ children }: { children: ReactNode }) => {
         if (event.nativeEvent.data.startsWith("{")) {
           const data = JSON.parse(event.nativeEvent.data);
 
+          console.log("메세지 data", data);
+
           if (data.type === "IMAGE_PICKER") {
             await handleImageSelection(data.source);
           }

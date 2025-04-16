@@ -44,12 +44,6 @@ export function OnboardingProvider({ children }: OnboardingProviderProps) {
     }
   }, [isOnboarded]);
 
-  useEffect(() => {
-    AsyncStorage.getItem(STORAGE_KEY.isLoggedIn).then((value) => {
-      if (value === "true") setIsOnboarded(true);
-    });
-  }, [completeOnboarding]);
-
   return (
     <OnboardingContext.Provider
       value={{
