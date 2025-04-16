@@ -121,6 +121,24 @@ export default function RootLayout() {
           router.replace(`/card-share/${cardId}`);
         }
       }
+      // card-detail/:id 경로 처리
+      else if (urlString.startsWith("card-detail/")) {
+        // 경로에서 card-detail/ 부분을 제거하고 숫자만 추출
+        const cardIdWithSlash = path.replace("card-detail/", "");
+        // 슬래시(/)를 제거하고 순수한 ID 값만 추출
+        const cardId = cardIdWithSlash.replace(/\//g, "");
+        // type 파라미터 추출
+        const type = searchParams.get("type") || "receivedcard";
+
+        if (cardId) {
+          console.log(`카드 상세 화면으로 이동: ${cardId}, 타입: ${type}`);
+
+          // Context에 cardId 저장
+          setCardId(cardId);
+
+          router.replace(`/card-detail/${cardId}`);
+        }
+      }
     } catch (error) {
       console.error("딥링크 처리 오류:", error);
     }
@@ -206,6 +224,15 @@ function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
         />
         <Stack.Screen
           name="card-share"
+          options={{
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: "black",
+            },
+          }}
+        />
+        <Stack.Screen
+          name="card-detail"
           options={{
             headerShown: false,
             headerStyle: {
