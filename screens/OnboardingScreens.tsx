@@ -12,6 +12,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getTokensWithCache } from "@/utils/getPushTokens";
 
 import * as Linking from "expo-linking";
+import { patchNotificationAllow } from "@/api/notification";
 
 const styles = StyleSheet.create({
   container: {
@@ -104,7 +105,17 @@ const OnboardingScreens = () => {
       }
 
       if (data.type === "NOTIFICATION_SETTINGS_CHANGED") {
-        console.log("알림 설정 변경 메시지 수신");
+        console.log("알림 설정 변경 메시지 수신", data);
+
+        const { isAllowPush, allowPushContent } = data.notificationAllow;
+
+        console.log("알림 설정 변경 메시지 수신", isAllowPush);
+        console.log("알림 설정 변경 메시지 수신", allowPushContent);
+
+        await patchNotificationAllow({
+          isAllowPush,
+          allowPushContent,
+        });
       }
 
       if (data.type === "LOG") {
