@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 
-import { ColorSchemeName, Alert } from "react-native";
+import { ColorSchemeName } from "react-native";
 import {
   DarkTheme,
   DefaultTheme,
@@ -24,7 +24,7 @@ import * as WebBrowser from "expo-web-browser";
 import * as Linking from "expo-linking";
 
 import { DeepLinkProvider, useDeepLink } from "@/providers/DeepLinkProvider";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { saveCardToServer } from "@/api/cardSave";
 
 WebBrowser.maybeCompleteAuthSession(); // 설명 - 웹브라우저 세션 자동 완료 설정 추가
 
@@ -44,8 +44,6 @@ SplashScreen.setOptions({
   duration: 2000,
   fade: true,
 });
-
-const API_URL = "https://api.even-took.com";
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -137,43 +135,6 @@ export default function RootLayout() {
       }
     } catch (error) {
       console.error("딥링크 처리 오류:", error);
-    }
-  };
-
-  // 카드 저장 함수
-  const saveCardToServer = async (cardId: string) => {
-    try {
-      // 앱에서 사용하는 API 클라이언트나 fetch 함수 사용
-      const response = await fetch(`${API_URL}/api/card/receive`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "Bearer " + (await getAuthToken()), // 인증 토큰 가져오기
-        },
-        body: JSON.stringify({ cardId }),
-      });
-
-      const data = await response.json();
-      console.log("카드 저장 결과:", data);
-
-      // 성공 알림 표시
-      Alert.alert("알림", "명함이 저장되었습니다.");
-    } catch (error) {
-      console.error("카드 저장 오류:", error);
-      Alert.alert("오류", "명함 저장에 실패했습니다.");
-    }
-  };
-
-  // 인증 토큰 가져오기 함수
-  const getAuthToken = async () => {
-    // 여기에 앱에서 사용하는 인증 토큰 저장소에서 토큰 가져오기 로직 구현
-    try {
-      const token = await AsyncStorage.getItem("accessToken");
-      console.log("토큰:", token);
-      return token;
-    } catch (error) {
-      console.error("토큰 가져오기 오류:", error);
-      return "";
     }
   };
 
