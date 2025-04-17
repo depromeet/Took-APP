@@ -2,7 +2,7 @@ import { WEBVIEW_URL } from "../config";
 import WebView, { WebViewMessageEvent } from "react-native-webview";
 import { useContext, useRef, useEffect } from "react";
 import { WebViewContext } from "@/providers/WebViewProvider";
-import { StyleSheet } from "react-native";
+import { Alert, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Constants from "expo-constants";
 import { useOnboarding } from "@/providers/OnBoardingProvider";
@@ -11,12 +11,30 @@ import CustomWebView from "@/components/customWebView";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { getTokensWithCache } from "@/utils/getPushTokens";
 
+import * as Linking from "expo-linking";
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     marginTop: Constants.statusBarHeight,
   },
 });
+
+const GOOGLE_FORM_URL = "https://forms.gle/FsAdnW5s5LVJkmBTA";
+
+const openInquiryPage = async () => {
+  console.log("문의사항 페이지 열기 시도");
+  try {
+    const supported = await Linking.canOpenURL(GOOGLE_FORM_URL);
+    if (supported) {
+      await Linking.openURL(GOOGLE_FORM_URL);
+    } else {
+      Alert.alert("문의사항 페이지 열기 중 오류:", GOOGLE_FORM_URL);
+    }
+  } catch (error) {
+    console.error("문의사항 페이지 열기 중 오류:", error);
+  }
+};
 
 const OnboardingScreens = () => {
   const context = useContext(WebViewContext);
@@ -79,6 +97,15 @@ const OnboardingScreens = () => {
     try {
       const data = JSON.parse(event.nativeEvent.data);
       console.log("웹뷰에서 메시지 수신 온보딩 :", data.type);
+
+      if (data.type === "OPEN_INQUIRY_PAGE") {
+        console.log("문의사항 페이지 열기 메시지 수신");
+        await openInquiryPage();
+      }
+
+      if (data.type === "NOTIFICATION_SETTINGS_CHANGED") {
+        console.log("알림 설정 변경 메시지 수신");
+      }
 
       if (data.type === "LOG") {
         const { level = "info", message, timestamp } = data;
