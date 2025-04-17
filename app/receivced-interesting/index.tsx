@@ -1,7 +1,7 @@
-import ReceivedInterestingScreens from "@/screens/ReceivedInterestingScreens";
+import React from "react";
+import ReceivedInterestingScreens from "../../screens/ReceivedInterestingScreens";
 
-const ReceivedInteresting = () => {
+export default function ReceivedInterestingScreen() {
+  // 기존 웹뷰 스크린 컴포넌트 사용
   return <ReceivedInterestingScreens />;
-};
-
-export default ReceivedInteresting;
+}

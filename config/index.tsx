@@ -9,4 +9,5 @@ export const WEBVIEW_URL = {
   cardShare: "https://www.even-took.com/card-share",
   cardShareDetail: "https://www.even-took.com/card-detail",
   receivedInteresting: "https://www.even-took.com/received/interesting",
+  cardNotes: "https://www.even-took.com/card-notes",
 };
