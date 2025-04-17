@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 import { ColorSchemeName } from "react-native";
 import {
@@ -53,6 +53,11 @@ export default function RootLayout() {
 
   const { setCardId } = useDeepLink();
 
+  // 이미 처리된 딥링크 URL 저장 (무한 루프 방지)
+  const [processedLinks, setProcessedLinks] = useState<Set<string>>(new Set());
+  // 딥링크 처리 중인지 여부
+  const isProcessingDeepLink = useRef(false);
+
   // 딥링크 처리 로직 추가
   useEffect(() => {
     // 앱이 이미 실행 중일 때 딥링크 처리
@@ -83,7 +88,21 @@ export default function RootLayout() {
   // 딥링크 URL 처리 함수
   const handleDeepLink = (url: string) => {
     if (!url) return;
+
+    // 이미 처리 중인 경우 무시 (동시에 여러 번 처리 방지)
+    if (isProcessingDeepLink.current) {
+      console.log("딥링크 처리 중...");
+      return;
+    }
+
+    // 이미 처리된 링크인지 확인
+    if (processedLinks.has(url)) {
+      console.log("이미 처리된 딥링크:", url);
+      return;
+    }
+
     console.log("딥링크 처리:", url);
+    isProcessingDeepLink.current = true;
 
     try {
       // URL 파싱하여 쿼리 파라미터 추출
@@ -92,6 +111,21 @@ export default function RootLayout() {
       const path = urlObj.pathname.replace("took://", "");
       const searchParams = new URLSearchParams(urlObj.search);
       const shouldSave = searchParams.get("save") === "true";
+
+      // received/interesting 경로 처리 (흥미로운 명함)
+      if (
+        urlString.startsWith("received/interesting") ||
+        path.includes("received/interesting")
+      ) {
+        console.log("흥미로운 명함 화면으로 이동");
+        // 라우터 경로는 파일 시스템의 실제 경로와 일치해야 함
+        router.replace("/received-interesting" as any);
+
+        // 처리된 링크 목록에 추가
+        setProcessedLinks((prev) => new Set([...prev, url]));
+        isProcessingDeepLink.current = false;
+        return;
+      }
 
       // card-share/:id 경로 처리
       if (urlString.startsWith("card-share/")) {
@@ -109,7 +143,16 @@ export default function RootLayout() {
           // save=true 파라미터가 있으면 카드 저장 로직 실행
           if (shouldSave) {
             console.log(`카드 저장 요청: ${cardId}`);
-            saveCardToServer(cardId);
+            // 카드 저장은 한 번만 실행
+            saveCardToServer(cardId).finally(() => {
+              // 저장 작업이 완료된 후 화면 이동 (save 파라미터 없이)
+              router.replace(`/card-share/${cardId}`);
+
+              // 처리된 링크 목록에 추가
+              setProcessedLinks((prev) => new Set([...prev, url]));
+              isProcessingDeepLink.current = false;
+            });
+            return;
           }
 
           router.replace(`/card-share/${cardId}`);
@@ -133,8 +176,13 @@ export default function RootLayout() {
           router.replace(`/card-detail/${cardId}`);
         }
       }
+
+      // 처리된 링크 목록에 추가
+      setProcessedLinks((prev) => new Set([...prev, url]));
     } catch (error) {
       console.error("딥링크 처리 오류:", error);
+    } finally {
+      isProcessingDeepLink.current = false;
     }
   };
 
@@ -190,6 +238,15 @@ function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
         />
         <Stack.Screen
           name="card-detail"
+          options={{
+            headerShown: false,
+            headerStyle: {
+              backgroundColor: "black",
+            },
+          }}
+        />
+        <Stack.Screen
+          name="received-interesting"
           options={{
             headerShown: false,
             headerStyle: {
