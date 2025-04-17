@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
-import { ColorSchemeName } from "react-native";
+import { ColorSchemeName, Alert } from "react-native";
 import {
   DarkTheme,
   DefaultTheme,
@@ -54,9 +54,11 @@ export default function RootLayout() {
   const { setCardId } = useDeepLink();
 
   // 이미 처리된 딥링크 URL 저장 (무한 루프 방지)
-  const [processedLinks, setProcessedLinks] = useState<Set<string>>(new Set());
+  const processedLinks = useRef<Set<string>>(new Set());
   // 딥링크 처리 중인지 여부
-  const isProcessingDeepLink = useRef(false);
+  const isProcessingDeepLink = useRef<boolean>(false);
+  // 현재 세션에서 저장한 카드 ID 추적
+  const savedCardIds = useRef<Set<string>>(new Set());
 
   // 딥링크 처리 로직 추가
   useEffect(() => {
@@ -86,7 +88,7 @@ export default function RootLayout() {
   }, []);
 
   // 딥링크 URL 처리 함수
-  const handleDeepLink = (url: string) => {
+  const handleDeepLink = async (url: string) => {
     if (!url) return;
 
     // 이미 처리 중인 경우 무시 (동시에 여러 번 처리 방지)
@@ -95,14 +97,20 @@ export default function RootLayout() {
       return;
     }
 
-    // 이미 처리된 링크인지 확인
-    if (processedLinks.has(url)) {
-      console.log("이미 처리된 딥링크:", url);
+    // 딥링크 URL에서 save 파라미터 제거
+    const normalizedUrl = url.split("?")[0];
+
+    // 이미 처리된 링크인지 확인 (파라미터를 제외한 기본 URL로 확인)
+    if (processedLinks.current.has(normalizedUrl)) {
+      console.log("이미 처리된 딥링크:", normalizedUrl);
       return;
     }
 
     console.log("딥링크 처리:", url);
+
+    // 처리 상태 설정 및 처리된 링크에 즉시 추가
     isProcessingDeepLink.current = true;
+    processedLinks.current.add(normalizedUrl);
 
     try {
       // URL 파싱하여 쿼리 파라미터 추출
@@ -120,9 +128,6 @@ export default function RootLayout() {
         console.log("흥미로운 명함 화면으로 이동");
         // 라우터 경로는 파일 시스템의 실제 경로와 일치해야 함
         router.replace("/received-interesting" as any);
-
-        // 처리된 링크 목록에 추가
-        setProcessedLinks((prev) => new Set([...prev, url]));
         isProcessingDeepLink.current = false;
         return;
       }
@@ -140,21 +145,23 @@ export default function RootLayout() {
           // Context에 cardId 저장
           setCardId(cardId);
 
-          // save=true 파라미터가 있으면 카드 저장 로직 실행
-          if (shouldSave) {
+          // save=true 파라미터가 있고 아직 저장하지 않은 카드인 경우에만 저장
+          if (shouldSave && !savedCardIds.current.has(cardId)) {
             console.log(`카드 저장 요청: ${cardId}`);
-            // 카드 저장은 한 번만 실행
-            saveCardToServer(cardId).finally(() => {
-              // 저장 작업이 완료된 후 화면 이동 (save 파라미터 없이)
-              router.replace(`/card-share/${cardId}`);
+            // 저장된 카드 목록에 추가
+            savedCardIds.current.add(cardId);
 
-              // 처리된 링크 목록에 추가
-              setProcessedLinks((prev) => new Set([...prev, url]));
-              isProcessingDeepLink.current = false;
-            });
-            return;
+            // 카드 저장 시도 (별도 스레드에서 처리)
+            try {
+              await saveCardToServer(cardId);
+            } catch (error) {
+              console.error("카드 저장 중 오류:", error);
+              // 오류 발생 시 저장 목록에서 제거하여 재시도 가능하게 함
+              savedCardIds.current.delete(cardId);
+            }
           }
 
+          // 무조건 파라미터 없는 깨끗한 URL로 라우팅
           router.replace(`/card-share/${cardId}`);
         }
       }
@@ -176,9 +183,6 @@ export default function RootLayout() {
           router.replace(`/card-detail/${cardId}`);
         }
       }
-
-      // 처리된 링크 목록에 추가
-      setProcessedLinks((prev) => new Set([...prev, url]));
     } catch (error) {
       console.error("딥링크 처리 오류:", error);
     } finally {
@@ -238,15 +242,6 @@ function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
         />
         <Stack.Screen
           name="card-detail"
-          options={{
-            headerShown: false,
-            headerStyle: {
-              backgroundColor: "black",
-            },
-          }}
-        />
-        <Stack.Screen
-          name="received-interesting"
           options={{
             headerShown: false,
             headerStyle: {
