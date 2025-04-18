@@ -8,6 +8,7 @@ import {
 } from "react";
 import * as Notifications from "expo-notifications";
 import { EventSubscription } from "expo-modules-core";
+import * as Linking from "expo-linking";
 import registerForPushNotificationsAsync from "@/utils/registerForPushNotificationsAsync";
 
 interface NotificationContextType {
@@ -32,6 +33,31 @@ export const useNotification = () => {
     );
   }
   return context;
+};
+
+/**
+ * 알림 데이터에서 링크를 추출하고 해당 링크로 이동하는 함수
+ * @param data 알림 데이터
+ */
+const handleNotificationLink = (data: any) => {
+  try {
+    if (data?.link) {
+      // 앱 내부 경로인 경우
+      if (data.link.startsWith("/")) {
+        const url = Linking.createURL(
+          data.link.startsWith("/") ? data.link.substring(1) : data.link,
+        );
+        console.log("Linking URL:", url);
+        Linking.openURL(url);
+      }
+      // 외부 URL인 경우 (http://, https:// 등)
+      else if (data.link.startsWith("http")) {
+        Linking.openURL(data.link);
+      }
+    }
+  } catch (error) {
+    console.error("딥링크 처리 오류:", error);
+  }
 };
 
 const NotificationProvider = ({ children }: NotificationProviderProps) => {
@@ -65,16 +91,12 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
 
     // 푸시 알림 클릭 시 실행
     responseListener.current =
-      Notifications.addNotificationResponseReceivedListener((notification) => {
-        console.log(
-          "notification response",
-          JSON.stringify(notification, null, 2),
-          JSON.stringify(
-            notification.notification.request.content.data,
-            null,
-            2,
-          ),
-        );
+      Notifications.addNotificationResponseReceivedListener((response) => {
+        const data = response.notification.request.content.data;
+        console.log("notification response", JSON.stringify(data, null, 2));
+
+        // 알림에 포함된 링크로 이동
+        handleNotificationLink(data);
       });
 
     return () => {
