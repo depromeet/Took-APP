@@ -149,7 +149,7 @@ function InnerRootLayout({ colorScheme }: InnerRootLayoutProps) {
           }}
         />
         <Stack.Screen
-          name="receivced-interesting"
+          name="received-interesting"
           options={{
             headerShown: false,
             headerStyle: {

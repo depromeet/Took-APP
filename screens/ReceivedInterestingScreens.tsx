@@ -9,6 +9,7 @@ import { WEBVIEW_URL } from "@/config";
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   },
 });
 
@@ -17,7 +18,10 @@ const ReceivedInterestingScreens = () => {
   const webViewRef = useRef<WebView | null>(null);
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "bottom", "left", "right"]}
+    >
       <CustomWebView
         ref={(ref) => {
           if (ref != null) {

@@ -93,7 +93,7 @@ function isCardDetailRoute(path: string): boolean {
  */
 async function handleInterestingRoute() {
   console.log("흥미로운 명함 화면으로 이동");
-  router.replace("/receivced-interesting" as any);
+  router.replace("/received-interesting" as any);
 }
 
 async function handleNotesRoute(

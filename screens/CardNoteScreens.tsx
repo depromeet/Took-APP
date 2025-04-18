@@ -11,9 +11,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
-  statusBar: {
-    backgroundColor: "#000",
-  },
 });
 
 const CardNoteScreens = () => {
@@ -21,7 +18,10 @@ const CardNoteScreens = () => {
   const webViewRef = useRef<WebView | null>(null);
 
   return (
-    <SafeAreaView style={styles.container} edges={["bottom", "left", "right"]}>
+    <SafeAreaView
+      style={styles.container}
+      edges={["top", "bottom", "left", "right"]}
+    >
       <CustomWebView
         ref={(ref) => {
           if (ref != null) {
