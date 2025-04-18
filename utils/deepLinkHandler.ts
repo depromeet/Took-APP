@@ -93,7 +93,10 @@ function isCardDetailRoute(path: string): boolean {
  */
 async function handleInterestingRoute() {
   console.log("흥미로운 명함 화면으로 이동");
-  router.replace("/received-interesting" as any);
+  router.replace({
+    pathname: "/received-interesting" as any,
+    params: { deepLink: "true" },
+  });
 }
 
 async function handleNotesRoute(
@@ -107,13 +110,12 @@ async function handleNotesRoute(
     const cardId = searchParams.get("cardId");
 
     if (noteId) {
-      router.replace(
-        `/card-notes/detail?noteId=${noteId}${cardId ? `&cardId=${cardId}` : ""}` as any,
-      );
+      router.replace({
+        pathname:
+          `/card-notes/detail?noteId=${noteId}${cardId ? `&cardId=${cardId}` : ""}` as any,
+        params: { deepLink: "true" },
+      });
       console.log(`메모 상세 화면으로 이동: noteId=${noteId}`);
-    } else {
-      // noteId가 없으면 기본 메모 목록으로 이동
-      console.log("메모 목록 화면으로 이동 (noteId 누락)");
     }
   } else {
     const cardId = searchParams.get("cardId");
