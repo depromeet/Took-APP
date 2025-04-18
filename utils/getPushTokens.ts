@@ -21,7 +21,11 @@ export async function getTokensWithCache(): Promise<TokenData> {
 
   try {
     // 기존 함수를 활용하여 Expo 토큰 가져오기
-    const expoToken = await registerForPushNotificationsAsync();
+    const result = await registerForPushNotificationsAsync();
+
+    // 에러 확인 및 처리 (에러 객체가 반환된 경우 처리)
+    const expoToken =
+      result && typeof result === "object" && "error" in result ? null : result;
 
     // FCM 토큰 가져오기 (권한 문제는 이미 registerForPushNotificationsAsync에서 처리됨)
     let fcmToken = null;

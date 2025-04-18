@@ -10,6 +10,7 @@ import * as Notifications from "expo-notifications";
 import { EventSubscription } from "expo-modules-core";
 import * as Linking from "expo-linking";
 import registerForPushNotificationsAsync from "@/utils/registerForPushNotificationsAsync";
+import { Alert } from "react-native";
 
 interface NotificationContextType {
   expoPushToken: string | null;
@@ -65,18 +66,37 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
   const [notification, setNotification] =
     useState<Notifications.Notification | null>(null);
   const [error, setError] = useState<Error | null>(null);
+  const [alertShown, setAlertShown] = useState(false);
 
   const notificationListener = useRef<EventSubscription>();
   const responseListener = useRef<EventSubscription>();
 
   useEffect(() => {
-    registerForPushNotificationsAsync().then(
-      (token) => {
-        console.log("token", token);
-        setExpoPushToken(token ?? null);
-      },
-      (error) => setError(error),
-    );
+    const getToken = async () => {
+      try {
+        const result = await registerForPushNotificationsAsync();
+
+        if (result && typeof result === "object" && "error" in result) {
+          // 에러가 있고 알림이 아직 표시되지 않은 경우에만 알림 표시
+          setError(result.error);
+          if (!alertShown) {
+            setAlertShown(true);
+            Alert.alert("알림 권한", result.error.message);
+          }
+        } else {
+          console.log("토큰 등록 성공:", result);
+          setExpoPushToken(result ?? null);
+        }
+      } catch (err) {
+        console.error("토큰 등록 중 예외 발생:", err);
+        if (!alertShown) {
+          setAlertShown(true);
+          setError(err instanceof Error ? err : new Error(String(err)));
+        }
+      }
+    };
+
+    getToken();
 
     // 푸시 알림 수신 시 실행
     notificationListener.current =
@@ -110,7 +130,7 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
         Notifications.removeNotificationSubscription(responseListener.current);
       }
     };
-  }, []);
+  }, [alertShown]);
 
   const notificationContextValue = useMemo(
     () => ({ expoPushToken, notification, error }),
