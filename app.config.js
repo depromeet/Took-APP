@@ -30,8 +30,8 @@ export default {
     userInterfaceStyle: "automatic",
     newArchEnabled: true,
     ios: {
-      supportsTablet: true,
-      bundleIdentifier: config.bundleId,
+      supportsTablet: false, // 태블릿 지원 여부
+      bundleIdentifier: config.bundleId, // 번들 ID
       infoPlist: {
         ITSAppUsesNonExemptEncryption: false,
         NSCameraUsageDescription:
