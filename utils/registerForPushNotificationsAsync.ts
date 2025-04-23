@@ -4,24 +4,45 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 
 // 환경에 따른 설정 가져오기
-const APP_ENV = Constants.expoConfig?.extra?.appEnv ?? "development";
+const APP_ENV = Constants.expoConfig?.extra?.appEnv || "development";
 console.log(`[Push Notification] Current environment: ${APP_ENV}`);
 
 // 결과 타입 정의
-type PushTokenResult = string | { error: string };
+type PushTokenResult = string | { status: "denied" | "error"; message: string };
 
 // 오류 로깅 중복 방지를 위한 변수
 let errorLogged = false;
 let cachedResult: PushTokenResult | null = null;
 
-// 오류 메시지를 로깅하고 오류 객체를 반환하는 함수
-function handleRegistrationError(errorMessage: string): { error: string } {
-  // 이미 로깅했다면 콘솔에 출력하지 않음
-  if (!errorLogged) {
+/**
+ * 알림 권한이 없는 경우를 처리하는 함수
+ * 오류가 아닌 상태로 처리합니다
+ */
+function handlePermissionDenied(message: string): {
+  status: "denied";
+  message: string;
+} {
+  // 개발 환경에서만 콘솔에 정보 메시지 출력
+  if (APP_ENV === "development" && !errorLogged) {
+    console.log(`[${APP_ENV}] 알림 권한 상태: ${message}`);
+    errorLogged = true;
+  }
+  return { status: "denied", message };
+}
+
+/**
+ * 실제 오류 상황을 처리하는 함수
+ */
+function handleRegistrationError(errorMessage: string): {
+  status: "error";
+  message: string;
+} {
+  // 개발 환경에서만 콘솔에 오류 메시지 출력
+  if (APP_ENV === "development" && !errorLogged) {
     console.error(`[${APP_ENV}] Push registration error: ${errorMessage}`);
     errorLogged = true;
   }
-  return { error: errorMessage };
+  return { status: "error", message: errorMessage };
 }
 
 // 안드로이드에서 푸시 알림 채널 설정
@@ -52,9 +73,9 @@ async function registerForPushNotificationsAsync(): Promise<PushTokenResult> {
       finalStatus = status;
     }
 
-    // 권한이 없다면 에러 반환
+    // 권한이 없다면 권한 거부 상태 반환 (오류가 아님)
     if (finalStatus !== "granted") {
-      cachedResult = handleRegistrationError(
+      cachedResult = handlePermissionDenied(
         "푸시 알림 권한이 없습니다. 알림 설정에서 푸시 알림 권한을 확인해주세요.",
       );
       return cachedResult;

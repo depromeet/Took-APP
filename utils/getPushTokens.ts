@@ -6,6 +6,8 @@ import registerForPushNotificationsAsync, {
 interface TokenData {
   fcmToken: string | null;
   expoToken: string | null;
+  status?: "granted" | "denied" | "error";
+  message?: string;
 }
 
 // 캐싱을 위한 변수
@@ -25,15 +27,22 @@ export async function getTokensWithCache(): Promise<TokenData> {
     // 기존 함수를 활용하여 Expo 토큰 가져오기
     const result = await registerForPushNotificationsAsync();
 
-    // 에러 확인 및 처리 (에러 객체가 반환된 경우 처리)
+    // 에러 확인 및 처리
     let expoToken = null;
-    if (result && typeof result === "object" && "error" in result) {
-      console.log("Expo 토큰 가져오는 중 오류:", result.error);
-    } else {
+    let tokenStatus: "granted" | "denied" | "error" = "granted";
+    let message: string | undefined = undefined;
+
+    if (typeof result === "string") {
+      // 토큰을 성공적으로 받은 경우
       expoToken = result;
+    } else if (typeof result === "object") {
+      // 상태 객체를 받은 경우 (권한 거부 또는 오류)
+      tokenStatus = result.status;
+      message = result.message;
+      // 로그는 registerForPushNotificationsAsync에서 이미 출력했으므로 여기서는 생략
     }
 
-    // FCM 토큰 가져오기 (권한 문제는 이미 registerForPushNotificationsAsync에서 처리됨)
+    // FCM 토큰 가져오기 (권한이 있는 경우에만)
     let fcmToken = null;
     try {
       // 푸시 권한이 있는 경우에만 FCM 토큰 요청
@@ -46,21 +55,31 @@ export async function getTokensWithCache(): Promise<TokenData> {
       console.log("FCM 토큰을 가져오는 중 오류:", error);
     }
 
-    // 토큰 캐싱
-    cachedTokens = {
-      expoToken: expoToken ?? null,
+    // 결과 객체 생성
+    const tokenData: TokenData = {
+      expoToken: expoToken || null,
       fcmToken,
+      status: tokenStatus,
+      message,
     };
 
-    // 로그 최소화 - 권한이 있을 때만 성공 로그 출력
-    if (expoToken) {
-      console.log("푸시 토큰이 성공적으로 가져와졌습니다:", cachedTokens);
+    // 캐시 저장
+    cachedTokens = tokenData;
+
+    // 로그 최소화 - 개발 환경에서 상태에 따라 출력
+    if (tokenStatus === "granted") {
+      console.log("푸시 토큰이 성공적으로 가져와졌습니다:", tokenData);
     }
 
-    return cachedTokens;
+    return tokenData;
   } catch (error) {
     console.error("푸시 토큰을 가져오는 중 오류:", error);
-    return { fcmToken: null, expoToken: null };
+    return {
+      fcmToken: null,
+      expoToken: null,
+      status: "error",
+      message: error instanceof Error ? error.message : String(error),
+    };
   }
 }
 
