@@ -25,6 +25,7 @@ import * as Linking from "expo-linking";
 
 import { DeepLinkProvider, useDeepLink } from "@/providers/DeepLinkProvider";
 import { handleDeepLink } from "@/utils/deepLinkHandler";
+import { requestLocationPermission } from "@/utils/permissionUtils";
 
 WebBrowser.maybeCompleteAuthSession(); // 설명 - 웹브라우저 세션 자동 완료 설정 추가
 
@@ -57,6 +58,18 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
+    }
+  }, [loaded]);
+
+  // 앱 로드 후 위치 권한 요청
+  useEffect(() => {
+    if (loaded) {
+      // 약간의 지연을 주어 스플래시 화면이 사라진 후 권한 요청
+      const timer = setTimeout(() => {
+        requestLocationPermission();
+      }, 1000);
+
+      return () => clearTimeout(timer);
     }
   }, [loaded]);
 
