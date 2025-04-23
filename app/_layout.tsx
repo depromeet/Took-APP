@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
 import { ColorSchemeName } from "react-native";
 import {
@@ -18,6 +18,7 @@ import { useColorScheme } from "@/hooks/useColorScheme";
 import { OnboardingProvider } from "@/providers/OnBoardingProvider";
 import { WebViewProvider } from "@/providers/WebViewProvider";
 import NotificationProvider from "@/providers/NotificationContext";
+import { useNotification } from "@/providers/NotificationContext";
 
 import * as Notifications from "expo-notifications";
 import * as WebBrowser from "expo-web-browser";
@@ -46,6 +47,33 @@ SplashScreen.setOptions({
   fade: true,
 });
 
+// 위치 권한 요청을 담당하는 내부 컴포넌트
+function LocationPermissionHandler() {
+  const notification = useNotification();
+  const [permissionRequested, setPermissionRequested] = useState(false);
+
+  // 알림 상태가 설정된 후 위치 권한 요청
+  useEffect(() => {
+    // 이미 요청했다면 다시 요청하지 않음
+    if (permissionRequested) return;
+
+    // 알림 토큰이 설정된 경우 또는 오류가 발생한 경우 (알림 권한 절차가 완료된 경우)
+    if (notification.expoPushToken !== null || notification.error !== null) {
+      console.log("알림 권한 설정 완료 후 위치 권한 요청 시작");
+
+      // 약간의 지연을 주어 알림 권한 처리가 완전히 완료되도록 함
+      const timer = setTimeout(() => {
+        requestLocationPermission();
+        setPermissionRequested(true);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [notification.expoPushToken, notification.error, permissionRequested]);
+
+  return null;
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [loaded] = useFonts({
@@ -58,18 +86,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
-    }
-  }, [loaded]);
-
-  // 앱 로드 후 위치 권한 요청
-  useEffect(() => {
-    if (loaded) {
-      // 약간의 지연을 주어 스플래시 화면이 사라진 후 권한 요청
-      const timer = setTimeout(() => {
-        requestLocationPermission();
-      }, 1000);
-
-      return () => clearTimeout(timer);
     }
   }, [loaded]);
 
@@ -109,6 +125,7 @@ export default function RootLayout() {
       <WebViewProvider>
         <OnboardingProvider>
           <DeepLinkProvider>
+            <LocationPermissionHandler />
             <InnerRootLayout colorScheme={colorScheme} />
           </DeepLinkProvider>
         </OnboardingProvider>
