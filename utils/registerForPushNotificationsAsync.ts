@@ -7,12 +7,6 @@ import { Platform } from "react-native";
 const APP_ENV = Constants.expoConfig?.extra?.appEnv ?? "development";
 console.log(`[Push Notification] Current environment: ${APP_ENV}`);
 
-// 환경에 따른 프로젝트 ID 처리
-const projectId =
-  APP_ENV === "production"
-    ? Constants?.expoConfig?.extra?.eas?.projectId // 프로덕션 프로젝트 ID
-    : Constants?.expoConfig?.extra?.eas?.projectId; // 개발 프로젝트 ID (필요 시 다른 ID 사용)
-
 // 오류 처리 함수 - alert 제거, 에러 객체만 반환
 function handleRegistrationError(errorMessage: string) {
   console.error(`[${APP_ENV}] Push registration error: ${errorMessage}`);
@@ -50,6 +44,12 @@ async function registerForPushNotificationsAsync() {
         ),
       };
     }
+
+    // 환경에 따른 프로젝트 ID 처리
+    const projectId =
+      APP_ENV === "production"
+        ? Constants?.expoConfig?.extra?.eas?.projectId // 프로덕션 프로젝트 ID
+        : Constants?.expoConfig?.extra?.eas?.projectId; // 개발 프로젝트 ID (필요 시 다른 ID 사용)
 
     if (!projectId) {
       return {
