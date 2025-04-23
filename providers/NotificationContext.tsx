@@ -15,6 +15,7 @@ import { Alert } from "react-native";
 interface NotificationContextType {
   expoPushToken: string | null;
   notification: Notifications.Notification | null;
+  permissionStatus: "granted" | "denied" | "error" | "unknown";
   error: Error | null;
 }
 
@@ -66,37 +67,65 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
   const [notification, setNotification] =
     useState<Notifications.Notification | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [alertShown, setAlertShown] = useState(false);
+  const [permissionStatus, setPermissionStatus] = useState<
+    "granted" | "denied" | "error" | "unknown"
+  >("unknown");
+  const [alertShown, setAlertShown] = useState(false); // 알림이 이미 표시되었는지 추적
 
   const notificationListener = useRef<EventSubscription>();
   const responseListener = useRef<EventSubscription>();
 
   useEffect(() => {
-    const getToken = async () => {
-      try {
-        const result = await registerForPushNotificationsAsync();
-
-        if (result && typeof result === "object" && "error" in result) {
-          // 에러가 있고 알림이 아직 표시되지 않은 경우에만 알림 표시
-          setError(result.error);
-          if (!alertShown) {
-            setAlertShown(true);
-            Alert.alert("알림 권한", result.error.message);
-          }
-        } else {
+    // 푸시 토큰 가져오기
+    registerForPushNotificationsAsync().then(
+      (result) => {
+        // 응답 처리
+        if (typeof result === "string") {
+          // 토큰을 성공적으로 받은 경우
           console.log("토큰 등록 성공:", result);
-          setExpoPushToken(result ?? null);
+          setExpoPushToken(result);
+          setPermissionStatus("granted");
+          setError(null);
+        } else if (typeof result === "object") {
+          // 권한 상태 또는 오류 객체인 경우
+          if (result.status === "denied") {
+            // 권한 거부 상태 - 정상적인 상태로 처리
+            setPermissionStatus("denied");
+            setExpoPushToken(null);
+
+            // 처음 한 번만 알림 표시
+            if (!alertShown) {
+              setAlertShown(true);
+              Alert.alert("알림 권한", result.message);
+            }
+          } else if (result.status === "error") {
+            // 실제 오류 상태
+            setPermissionStatus("error");
+            setError(new Error(result.message));
+            setExpoPushToken(null);
+
+            // 처음 한 번만 알림 표시
+            if (!alertShown) {
+              setAlertShown(true);
+              Alert.alert("알림 오류", result.message);
+            }
+          }
         }
-      } catch (err) {
-        console.error("토큰 등록 중 예외 발생:", err);
+      },
+      (err) => {
+        // 예외가 발생한 경우
+        console.error("토큰 요청 중 예외 발생:", err);
+        setError(err instanceof Error ? err : new Error(String(err)));
+        setPermissionStatus("error");
+        setExpoPushToken(null);
+
+        // 알림은 한 번만 표시
         if (!alertShown) {
           setAlertShown(true);
-          setError(err instanceof Error ? err : new Error(String(err)));
+          Alert.alert("알림 오류", "푸시 알림 설정 중 오류가 발생했습니다.");
         }
-      }
-    };
-
-    getToken();
+      },
+    );
 
     // 푸시 알림 수신 시 실행
     notificationListener.current =
@@ -133,8 +162,13 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
   }, [alertShown]);
 
   const notificationContextValue = useMemo(
-    () => ({ expoPushToken, notification, error }),
-    [expoPushToken, notification, error],
+    () => ({
+      expoPushToken,
+      notification,
+      error,
+      permissionStatus,
+    }),
+    [expoPushToken, notification, error, permissionStatus],
   );
 
   return (
