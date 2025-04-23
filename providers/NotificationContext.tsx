@@ -66,37 +66,42 @@ const NotificationProvider = ({ children }: NotificationProviderProps) => {
   const [notification, setNotification] =
     useState<Notifications.Notification | null>(null);
   const [error, setError] = useState<Error | null>(null);
-  const [alertShown, setAlertShown] = useState(false);
+  const [alertShown, setAlertShown] = useState(false); // 알림이 이미 표시되었는지 추적
 
   const notificationListener = useRef<EventSubscription>();
   const responseListener = useRef<EventSubscription>();
 
   useEffect(() => {
-    const getToken = async () => {
-      try {
-        const result = await registerForPushNotificationsAsync();
-
+    // 푸시 토큰 가져오기
+    registerForPushNotificationsAsync().then(
+      (result) => {
+        // 에러 객체인지 확인
         if (result && typeof result === "object" && "error" in result) {
-          // 에러가 있고 알림이 아직 표시되지 않은 경우에만 알림 표시
-          setError(result.error);
+          console.log("푸시 알림 권한 오류:", result.error);
+
+          // 알림은 한 번만 표시
           if (!alertShown) {
             setAlertShown(true);
-            Alert.alert("알림 권한", result.error.message);
+            Alert.alert("알림 권한", result.error);
           }
+
+          setExpoPushToken(null);
         } else {
           console.log("토큰 등록 성공:", result);
           setExpoPushToken(result ?? null);
         }
-      } catch (err) {
-        console.error("토큰 등록 중 예외 발생:", err);
+      },
+      (error) => {
+        console.error("토큰 요청 중 예외 발생:", error);
+        setError(error);
+
+        // 알림은 한 번만 표시
         if (!alertShown) {
           setAlertShown(true);
-          setError(err instanceof Error ? err : new Error(String(err)));
+          Alert.alert("알림 오류", "푸시 알림 설정 중 오류가 발생했습니다.");
         }
-      }
-    };
-
-    getToken();
+      },
+    );
 
     // 푸시 알림 수신 시 실행
     notificationListener.current =

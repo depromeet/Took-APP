@@ -7,14 +7,30 @@ import { Platform } from "react-native";
 const APP_ENV = Constants.expoConfig?.extra?.appEnv ?? "development";
 console.log(`[Push Notification] Current environment: ${APP_ENV}`);
 
-// 오류 처리 함수 - alert 제거, 에러 객체만 반환
-function handleRegistrationError(errorMessage: string) {
-  console.error(`[${APP_ENV}] Push registration error: ${errorMessage}`);
-  return new Error(errorMessage);
+// 결과 타입 정의
+type PushTokenResult = string | { error: string };
+
+// 오류 로깅 중복 방지를 위한 변수
+let errorLogged = false;
+let cachedResult: PushTokenResult | null = null;
+
+// 오류 메시지를 로깅하고 오류 객체를 반환하는 함수
+function handleRegistrationError(errorMessage: string): { error: string } {
+  // 이미 로깅했다면 콘솔에 출력하지 않음
+  if (!errorLogged) {
+    console.error(`[${APP_ENV}] Push registration error: ${errorMessage}`);
+    errorLogged = true;
+  }
+  return { error: errorMessage };
 }
 
 // 안드로이드에서 푸시 알림 채널 설정
-async function registerForPushNotificationsAsync() {
+async function registerForPushNotificationsAsync(): Promise<PushTokenResult> {
+  // 캐시된 결과가 있으면 바로 반환
+  if (cachedResult) {
+    return cachedResult;
+  }
+
   if (Platform.OS === "android") {
     Notifications.setNotificationChannelAsync("default", {
       name: "default",
@@ -36,13 +52,12 @@ async function registerForPushNotificationsAsync() {
       finalStatus = status;
     }
 
-    // 권한이 없다면 에러 객체 반환 (throw 대신)
+    // 권한이 없다면 에러 반환
     if (finalStatus !== "granted") {
-      return {
-        error: handleRegistrationError(
-          "푸시 알림 권한이 없습니다. 알림 설정에서 푸시 알림 권한을 확인해주세요.",
-        ),
-      };
+      cachedResult = handleRegistrationError(
+        "푸시 알림 권한이 없습니다. 알림 설정에서 푸시 알림 권한을 확인해주세요.",
+      );
+      return cachedResult;
     }
 
     // 환경에 따른 프로젝트 ID 처리
@@ -52,9 +67,8 @@ async function registerForPushNotificationsAsync() {
         : Constants?.expoConfig?.extra?.eas?.projectId; // 개발 프로젝트 ID (필요 시 다른 ID 사용)
 
     if (!projectId) {
-      return {
-        error: handleRegistrationError("프로젝트 ID를 찾을 수 없습니다."),
-      };
+      cachedResult = handleRegistrationError("프로젝트 ID를 찾을 수 없습니다.");
+      return cachedResult;
     }
 
     try {
@@ -69,9 +83,12 @@ async function registerForPushNotificationsAsync() {
       ).data;
 
       console.log(`[${APP_ENV}] Push Token: ${pushTokenString}`);
+      cachedResult = pushTokenString;
       return pushTokenString;
     } catch (e: unknown) {
-      return { error: handleRegistrationError(`FCM 토큰 등록 오류: ${e}`) };
+      console.error("FCM 토큰 등록 중 오류:", e);
+      cachedResult = handleRegistrationError(`FCM 토큰 등록 오류: ${e}`);
+      return cachedResult;
     }
   } else {
     // 물리적 기기에서만 푸시 알림 권한 요청
@@ -83,16 +100,22 @@ async function registerForPushNotificationsAsync() {
       console.warn(
         "개발 환경에서는 에뮬레이터에 푸시 알림이 지원되지 않습니다.",
       );
-      return "SIMULATOR_" + APP_ENV; // 시뮬레이터용 더미 토큰
+      cachedResult = "SIMULATOR_" + APP_ENV; // 시뮬레이터용 더미 토큰
+      return cachedResult;
     } else {
       // 프로덕션에서는 오류 객체 반환
-      return {
-        error: handleRegistrationError(
-          "물리적 기기에서만 푸시 알림 권한을 요청할 수 있습니다.",
-        ),
-      };
+      cachedResult = handleRegistrationError(
+        "물리적 기기에서만 푸시 알림 권한을 요청할 수 있습니다.",
+      );
+      return cachedResult;
     }
   }
+}
+
+// 토큰 새로고침을 위한 함수 추가
+export function resetPushTokenCache() {
+  cachedResult = null;
+  errorLogged = false;
 }
 
 export default registerForPushNotificationsAsync;
