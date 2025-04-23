@@ -40,6 +40,10 @@ export default {
           "프로필 이미지를 선택하기 위해 사진 라이브러리 접근이 필요합니다.",
         NSMicrophoneUsageDescription:
           "카메라 사용 시 마이크 권한이 필요합니다.",
+        NSLocationWhenInUseUsageDescription:
+          "주변 사람에게 명함을 공유하기 위해 위치 정보가 필요합니다.",
+        NSLocationAlwaysAndWhenInUseUsageDescription:
+          "주변 사람에게 명함을 공유하기 위해 위치 정보가 필요합니다.",
         CFBundleDevelopmentRegion: "ko",
         CFBundleLocalizations: ["ko"],
       },
@@ -51,6 +55,10 @@ export default {
       },
       package: config.packageName,
       googleServicesFile: config.firebaseConfigFile,
+      permissions: [
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+      ],
     },
     web: {
       bundler: "metro",
@@ -87,6 +95,15 @@ export default {
             "프로필 이미지를 선택하기 위해 사진 라이브러리 접근이 필요합니다.",
           cameraPermission:
             "프로필 이미지를 촬영하기 위해 카메라 접근이 필요합니다.",
+        },
+      ],
+      [
+        "expo-location",
+        {
+          locationAlwaysAndWhenInUsePermission:
+            "주변 사람에게 명함을 공유하기 위해 위치 정보가 필요합니다.",
+          locationWhenInUsePermission:
+            "주변 사람에게 명함을 공유하기 위해 위치 정보가 필요합니다.",
         },
       ],
     ],
